@@ -1,13 +1,21 @@
 
 import java.util.List;
 
+import utils.CSVReader;
+import utils.Procesador;
 import utils.Tarea;
 
 public class Main {
     public static void main(String[] args) {
+        CSVReader reader = new CSVReader();
+
+        // Leer tareas y procesadores
+        List<Tarea> tareas = reader.readTasks("datasets/Tareas.csv");
+        List<Procesador> procesadores = reader.readProcessors("datasets/Procesadores.csv");
+        
         // Crear una instancia de Servicios con los archivos CSV como entrada
         Servicios servicios = new Servicios("datasets/Procesadores.csv", "datasets/Tareas.csv");
-
+        
         // Prueba Servicio 1: Buscar tarea por ID
         System.out.println("=== Servicio 1: Buscar Tarea por ID ===");
         Tarea tareaBuscada = servicios.servicio1("T1");
@@ -37,5 +45,21 @@ public class Main {
         for (Tarea t : tareasPrioridad) {
             System.out.println(t);
         }
+
+        // Crear instancia de AsignadorTareas con un tiempo máximo de ejecución para procesadores sin refrigeración
+        int maxTiempoSinRefrigeracion = 100; // Ajusta este valor según las pruebas
+        AsignadorTareas asignador = new AsignadorTareas(tareas, procesadores, maxTiempoSinRefrigeracion);
+    
+        // Probar Backtracking
+        System.out.println("=== Asignación Backtracking ===");
+        AsignadorTareas.Solucion solucionBacktracking = asignador.backtracking();
+        solucionBacktracking.getSolucion().forEach(e -> System.out.println(e.getProcesador() + " -> " + e.getTarea()));
+        System.out.println("Tiempo máximo de ejecución (Backtracking): " + solucionBacktracking.getTiempoMaximo());
+
+        // Probar Greedy
+        System.out.println("=== Asignación Greedy ===");
+        AsignadorTareas.Solucion solucionGreedy = asignador.greedy();
+        solucionGreedy.getSolucion().forEach(e -> System.out.println(e.getProcesador() + " -> " + e.getTarea()));
+        System.out.println("Tiempo máximo de ejecución (Greedy): " + solucionGreedy.getTiempoMaximo());
     }
 }
